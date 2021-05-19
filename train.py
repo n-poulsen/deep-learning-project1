@@ -31,8 +31,8 @@ def test(model: torch.nn.Module,
             predictions = torch.argmax(outputs, dim=1)
             num_errors += (predictions != targets).sum().item()
 
-    error_rate = num_errors/len(dataloader.dataset)
-    average_loss = loss/len(dataloader)
+    error_rate = num_errors / len(dataloader.dataset)
+    average_loss = loss / len(dataloader)
 
     # Put the model back into train mode
     model.train()
@@ -83,11 +83,11 @@ def train(model: torch.nn.Module,
     return train_losses, train_errors, test_losses, test_errors
 
 
-def test_aux(model: torch.nn.Module,
-             criterion: torch.nn.Module,
-             aux_criterion: torch.nn.Module,
-             aux_loss_weight: float,
-             dataloader: data.DataLoader) -> (float, float):
+def test_with_auxiliary_loss(model: torch.nn.Module,
+                             criterion: torch.nn.Module,
+                             aux_criterion: torch.nn.Module,
+                             aux_loss_weight: float,
+                             dataloader: data.DataLoader) -> (float, float):
     """
     Tests a model.
 
@@ -104,8 +104,8 @@ def test_aux(model: torch.nn.Module,
     with torch.no_grad():
         num_errors = 0
         loss = 0
-        for i, test_data in enumerate(dataloader):
-            inputs, targets, aux1, aux2 = test_data
+        for i, batch in enumerate(dataloader):
+            inputs, targets, aux1, aux2 = batch
             outputs, out_aux1, out_aux2 = model(inputs)
 
             loss = criterion(outputs, targets)
@@ -125,14 +125,15 @@ def test_aux(model: torch.nn.Module,
     return average_loss, error_rate
 
 
-def train_aux(model: torch.nn.Module,
-              optimizer: torch.optim.Optimizer,
-              criterion: torch.nn.Module,
-              aux_criterion: torch.nn.Module,
-              train_data: data.DataLoader,
-              test_data: data.DataLoader,
-              num_epochs: int,
-              aux_loss_weight: float = 1.0) -> Tuple[List[float], List[float], List[float], List[float]]:
+def train_with_auxiliary_loss(
+        model: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        criterion: torch.nn.Module,
+        aux_criterion: torch.nn.Module,
+        train_data: data.DataLoader,
+        test_data: data.DataLoader,
+        num_epochs: int,
+        aux_loss_weight: float = 1.0) -> Tuple[List[float], List[float], List[float], List[float]]:
     """
     Trains a model.
 
@@ -164,75 +165,13 @@ def train_aux(model: torch.nn.Module,
             optimizer.step()
 
         # Compute the error rate on the training set
-        train_loss, train_error = test_aux(model, criterion, aux_criterion, aux_loss_weight, train_data)
+        train_loss, train_error = test_with_auxiliary_loss(model, criterion, aux_criterion, aux_loss_weight, train_data)
         train_losses.append(train_loss)
         train_errors.append(train_error)
 
         # Compute the error rate on the test
-        test_loss, test_error = test_aux(model, criterion, aux_criterion, aux_loss_weight, test_data)
+        test_loss, test_error = test_with_auxiliary_loss(model, criterion, aux_criterion, aux_loss_weight, test_data)
         test_losses.append(test_loss)
         test_errors.append(test_error)
 
     return train_losses, train_errors, test_losses, test_errors
-
-
-def test_bce(model: torch.nn.Module,
-             criterion: torch.nn.Module,
-             dataloader: data.DataLoader) -> (float, float):
-    """
-    Tests a model.
-
-    :param model: The trained model to evaluate.
-    :param criterion: The loss criterion to use.
-    :param dataloader: The DataLoader containing the test data.
-    :return: The average loss and error rate of the model on the test set.
-    """
-    # Put the model into evaluation mode
-    model.eval()
-
-    with torch.no_grad():
-        num_errors = 0
-        loss = 0
-        for i, test_data in enumerate(dataloader):
-            inputs, targets, _, _ = test_data
-            outputs = model(inputs)
-            loss += criterion(outputs, targets).item()
-
-            if (outputs > 0) != targets:
-                num_errors += 1
-
-    error_rate = num_errors/len(dataloader)
-    average_loss = loss/len(dataloader)
-
-    # Put the model back into train mode
-    model.train()
-    return average_loss, error_rate
-
-
-def test_aux_bce(model: torch.nn.Module, criterion: torch.nn.Module, dataloader: data.DataLoader) -> (float, float):
-    """
-    Tests a model.
-
-    :param model: The trained model to evaluate.
-    :param criterion: The loss criterion to use.
-    :param dataloader: The DataLoader containing the test data.
-    :return: The average loss and error rate of the model on the test set.
-    """
-    # Put the model into evaluation mode
-    model.eval()
-
-    with torch.no_grad():
-        num_errors = 0
-        loss = 0
-        for i, test_data in enumerate(dataloader):
-            inputs, targets, _, _ = test_data
-            outputs = model(inputs)[0]
-            loss += criterion(outputs, targets).item()
-            if (outputs > 0) != targets:
-                num_errors += 1
-    error_rate = num_errors/len(dataloader)
-    average_loss = loss/len(dataloader)
-
-    # Put the model back into train mode
-    model.train()
-    return average_loss, error_rate

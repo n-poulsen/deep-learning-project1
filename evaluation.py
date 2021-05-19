@@ -15,28 +15,32 @@ from data_loader import ImageDataset
 
 
 def model_tuning(
-        gen_model: Callable[[float], Tuple[nn.Module, nn.Module, optim.Optimizer]],
+        gen_model: Callable[[dict], Tuple[nn.Module, nn.Module, optim.Optimizer]],
         train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, data.DataLoader, data.DataLoader, int],
                                Tuple[List[float], List[float], List[float], List[float]]],
         num_epochs: int,
         batch_sizes: List[int],
         learning_rates: List[float],
+        hidden_layer_units: List[int],
         seed: Optional[int] = None,
-        print_round_results: bool = True) -> Tuple[int, float]:
+        print_round_results: bool = True) -> Tuple[int, float, int]:
     """
-    Runs 5-fold cross validation to select the best learning rate and batch size for a model
+    Runs 5-fold cross validation to select the best learning rate, batch size and number of hidden units for a model
 
-    :param gen_model: Function generating the model to test. Takes as arguments the learning rate for the optimizer.
+    :param gen_model: Function generating the model to test. Takes as arguments a dictionary with the keys 'lr', setting
+        the learning rate for the optimizer, and 'hidden_units', setting the number of hidden units in the model.
         Returns the model, loss function and optimizer to test.
     :param train_method: The method used to train the model. Takes as input the model to train, the optimizer to use,
         the loss function, the DataLoader containing the training data, the DataLoader containing the test data, and the
         number of epochs for which to train. Returns the loss and error rates on the training and test set after each
         epoch.
-    :param num_epochs:
-    :param batch_sizes:
-    :param learning_rates:
-    :param seed:
-    :param print_round_results:
+    :param num_epochs: the number of epochs to train the model for
+    :param batch_sizes: the batch sizes to try
+    :param learning_rates: the learning rates to try
+    :param hidden_layer_units: the number of hidden layer units to try
+    :param seed: the random seed if reproducibility is needed
+    :param print_round_results: whether to print intermediate results to the console
+    :return: The batch size, learning rate and number of hidden units producing the best results
     """
     if seed:
         torch.manual_seed(seed)
@@ -49,50 +53,56 @@ def model_tuning(
     best_val_loss = 10000
     best_batch_size = None
     best_learning_rate = None
+    best_hidden_units = None
 
     for batch_size in batch_sizes:
         for lr in learning_rates:
+            for hidden_units in hidden_layer_units:
 
-            if seed:
-                torch.manual_seed(seed)
+                if seed:
+                    torch.manual_seed(seed)
 
-            average_val_loss = 0
-
-            if print_round_results:
-                print(f'Testing batch_size {batch_size}, lr={lr}')
-
-            # Run 5-fold cross validation on the hyperparameters
-            for fold_left_out in range(5):
-                # Create the training and validation data loaders for the folds
-                train_folds = folds[:fold_left_out] + folds[fold_left_out + 1:]
-                train_dataset = data.ConcatDataset(train_folds)
-                val_dataset = folds[fold_left_out]
-                train_data = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                val_data = data.DataLoader(val_dataset, batch_size=1, shuffle=False)
-
-                # Generate the model, criterion and optimizer
-                model, criterion, optimizer = gen_model(lr)
-
-                # Train the model
-                _, _, val_loss, _ = train_method(model, optimizer, criterion, train_data, val_data, num_epochs)
-                final_val_loss = val_loss[-1]
-                average_val_loss += final_val_loss
+                average_val_loss = 0
 
                 if print_round_results:
-                    print(f'    Round {fold_left_out}: {final_val_loss:.4f}')
+                    print(f'Testing batch_size {batch_size}, lr={lr}, units={hidden_units}')
 
-            if print_round_results:
-                print(f'  Average: {average_val_loss/5:.4f}')
+                # Run 5-fold cross validation on the hyperparameters
+                for fold_left_out in range(5):
+                    # Create the training and validation data loaders for the folds
+                    train_folds = folds[:fold_left_out] + folds[fold_left_out + 1:]
+                    train_dataset = data.ConcatDataset(train_folds)
+                    val_dataset = folds[fold_left_out]
+                    train_data = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+                    val_data = data.DataLoader(val_dataset, batch_size=1, shuffle=False)
 
-            if average_val_loss < best_val_loss:
-                best_val_loss = average_val_loss
-                best_batch_size = batch_size
-                best_learning_rate = lr
+                    # Generate the model, criterion and optimizer
+                    model, criterion, optimizer = gen_model({
+                        'lr': lr,
+                        'hidden_units': hidden_units,
+                    })
 
-    return best_batch_size, best_learning_rate
+                    # Train the model
+                    _, _, val_loss, _ = train_method(model, optimizer, criterion, train_data, val_data, num_epochs)
+                    final_val_loss = val_loss[-1]
+                    average_val_loss += final_val_loss
+
+                    if print_round_results:
+                        print(f'    Round {fold_left_out}: {final_val_loss:.4f}')
+
+                if print_round_results:
+                    print(f'  Average: {average_val_loss/5:.4f}')
+
+                if average_val_loss < best_val_loss:
+                    best_val_loss = average_val_loss
+                    best_batch_size = batch_size
+                    best_learning_rate = lr
+                    best_hidden_units = hidden_units
+
+    return best_batch_size, best_learning_rate, best_hidden_units
 
 
-def model_eval(
+def model_evaluation(
         gen_model: Callable[[], Tuple[nn.Module, nn.Module, optim.Optimizer]],
         train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, data.DataLoader, data.DataLoader, int],
                                Tuple[List[float], List[float], List[float], List[float]]],
@@ -109,7 +119,7 @@ def model_eval(
 
     :param gen_model: Function generating the model to test. Returns the model, loss function and optimizer to test.
     :param train_method: The method used to train the model. Takes as input the model to train, the optimizer to use,
-        the loss function, the DataLoader containing the training data, the DataLoader containing the test data, and the
+        the loss function, the DataLoader containing the training data, the DataLoader containing the test data and the
         number of epochs for which to train. Returns the loss and error rates on the training and test set after each
         epoch.
     :param rounds: The number of rounds used to evaluate the performance of the model
@@ -149,12 +159,14 @@ def model_eval(
     return round_results
 
 
-def aux_model_eval(
+def model_evaluation_with_auxiliary_loss(
         gen_model: Callable[[], Tuple[nn.Module, nn.Module, nn.Module, optim.Optimizer]],
-        train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, nn.Module, data.DataLoader, data.DataLoader, int],
-                               Tuple[List[float], List[float], List[float], List[float]]],
+        train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, nn.Module, data.DataLoader, data.DataLoader,
+                                int, float], Tuple[List[float], List[float], List[float], List[float]]],
+        auxiliary_loss_weight: float,
         rounds: int,
         num_epochs: int,
+        batch_size: int,
         seed: Optional[int] = None,
         print_round_results: bool = True) -> List[Tuple[List[float], List[float], List[float], List[float]]]:
     """
@@ -167,10 +179,12 @@ def aux_model_eval(
         and optimizer to test.
     :param train_method: The method used to train the model. Takes as input the model to train, the optimizer to use,
         the loss function, the auxiliary loss function, the DataLoader containing the training data, the DataLoader
-        containing the test data, and the number of epochs for which to train. Returns the loss and error rates on the
-        training and test set after each epoch.
+        containing the test data, the number of epochs for which to train and the weight to apply to the auxiliary loss.
+        Returns the loss and error rates on the training and test set after each epoch.
+    :param auxiliary_loss_weight: The weight to apply to the auxiliary loss
     :param rounds: The number of rounds used to evaluate the performance of the model
     :param num_epochs: The number of epochs for which to train.
+    :param batch_size: The mini-batch size to use for training.
     :param seed: Random seed to use for reproducibility
     :param print_round_results: Whether to print the results for each round while evaluating models
     :return: For each round, the training loss, training error, test loss and test error for each epoch.
@@ -183,14 +197,17 @@ def aux_model_eval(
     for test_round in range(rounds):
         # Load data
         train_x, train_y, train_c, test_x, test_y, test_c = generate_pair_sets(1000)
-        train_data = train_loader(train_x, train_y, train_c, 10)
+        train_data = train_loader(train_x, train_y, train_c, batch_size)
         test_data = test_loader(test_x, test_y, test_c)
 
         # Generate the model, criterion, auxiliary criterion and optimizer
-        model, crit, aux_crit, opti = gen_model()
+        model, criterion, aux_criterion, optimizer = gen_model()
 
         # Train the model
-        tr_loss, tr_err, te_loss, te_err = train_method(model, opti, crit, aux_crit, train_data, test_data, num_epochs)
+        tr_loss, tr_err, te_loss, te_err = train_method(
+            model, optimizer, criterion, aux_criterion, train_data, test_data, num_epochs, auxiliary_loss_weight)
+
+        # Process results
         round_results.append((tr_loss, tr_err, te_loss, te_err))
 
         # Print the results for the round
@@ -205,7 +222,7 @@ def aux_model_eval(
     return round_results
 
 
-def model_perf(per_round_error_rate: List[float]):
+def model_performance(per_round_error_rate: List[float]):
     """
     Computes the mean and standard deviation of the error rate for a model, and plots the error rate for each round.
 
