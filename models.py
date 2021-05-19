@@ -44,14 +44,14 @@ class CustomLeNet5(nn.Module):
 
         self.conv_layer_1 = nn.Sequential(
             nn.Conv2d(input_channels, 12, kernel_size=(3, 3), padding=(1, 1)),
-            nn.MaxPool2d((2, 2)),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2))
         )
 
         self.conv_layer_2 = nn.Sequential(
             nn.Conv2d(12, 32, kernel_size=(3, 3), padding=(1, 1)),
-            nn.MaxPool2d((2, 2)),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2))
         )
 
         # Take into account the 2 max pools
