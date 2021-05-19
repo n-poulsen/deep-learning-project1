@@ -7,39 +7,14 @@ import torch.nn as nn
 """ File containing all models implemented for Project 1 """
 
 
-class BaselineMLP(nn.Module):
-    """
-    Simple MLP, with a variable amount of hidden layers and units.
-
-    Takes as input batches of 2 x 14 x 14 images.
-    """
-
-    def __init__(self, hidden_layer_sizes: List[int], activation: torch.nn.Module):
-        super().__init__()
-        layers = []
-        prev_layer_units = 2 * 14 * 14
-        # Add hidden layers
-        for i, num_layer_units in enumerate(hidden_layer_sizes):
-            layers.append((f'Hidden Layer {i + 1}', nn.Linear(prev_layer_units, num_layer_units)))
-            layers.append((f'Activation {i + 1}', activation))
-            prev_layer_units = num_layer_units
-
-        # Add final layer
-        layers.append((f'Final Layer', nn.Linear(prev_layer_units, 2)))
-        self.layers = nn.Sequential(OrderedDict(layers))
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x.reshape(x.shape[0], -1)
-        x = self.layers(x)
-        return x
-
-
 class CustomLeNet5(nn.Module):
-    """
-    Simple CNN.
-    """
+    """ Modified version of LeNet5 for our MNIST dataset """
 
-    def __init__(self, input_channels, output_size):
+    def __init__(self, input_channels: int, output_size: int):
+        """
+        :param input_channels: The number of channels in the data passed as input to the model
+        :param output_size: The number of units output by the model
+        """
         super().__init__()
 
         self.conv_layer_1 = nn.Sequential(
@@ -75,13 +50,14 @@ class CustomLeNet5(nn.Module):
 
 
 class MLPClassifier(nn.Module):
+    """ Simple classifier used to process the output of LeNet5, with a single hidden layer. """
 
-    def __init__(self, hidden_layers):
+    def __init__(self, hidden_layer_units):
         super().__init__()
 
-        self.fc1 = nn.Linear(20, hidden_layers)
+        self.fc1 = nn.Linear(20, hidden_layer_units)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_layers, 2)
+        self.fc2 = nn.Linear(hidden_layer_units, 2)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -91,6 +67,7 @@ class MLPClassifier(nn.Module):
 
 
 class BaselineCNN(nn.Module):
+    """ First baseline classifier: the two images are passed as 2 channels to LeNet5, which outputs two logits """
 
     def __init__(self):
         super().__init__()
@@ -102,12 +79,14 @@ class BaselineCNN(nn.Module):
 
 
 class BaselineCNN2(nn.Module):
+    """ First baseline classifier: the two images are passed as 2 channels to LeNet5, which outputs a tensor containing
+    20 values. These values are then passed to a simple classifier with a single hidden layer. """
 
-    def __init__(self):
+    def __init__(self, hidden_layer_units):
         super().__init__()
 
         self.lenet = CustomLeNet5(input_channels=2, output_size=20)
-        self.classifier = MLPClassifier(hidden_layers=50)
+        self.classifier = MLPClassifier(hidden_layer_units=hidden_layer_units)
 
     def forward(self, x):
         x = self.lenet(x)
@@ -116,12 +95,15 @@ class BaselineCNN2(nn.Module):
 
 
 class WeightSharingCNN(nn.Module):
+    """ Classifier taking advantage of weight sharing. The input tensor containing the two images is split in two. Each
+    image is processed individually in the custom LeNet5. The output logits for both images are concatenated, and
+    passed through a simple classifier with a single hidden layer. """
 
-    def __init__(self):
+    def __init__(self, hidden_layer_units):
         super().__init__()
 
         self.lenet = CustomLeNet5(input_channels=1, output_size=10)
-        self.classifier = MLPClassifier(hidden_layers=50)
+        self.classifier = MLPClassifier(hidden_layer_units=hidden_layer_units)
 
     def forward(self, x):
         # Process first images
@@ -139,12 +121,16 @@ class WeightSharingCNN(nn.Module):
 
 
 class WeightSharingAuxLossCNN(nn.Module):
+    """ Classifier taking advantage of weight sharing and auxiliary losses. The input tensor containing the two images
+    is split in two. Each image is processed individually in the custom LeNet5. The output logits for both images are
+    concatenated, and passed through a simple classifier with a single hidden layer. The logits for each image are also
+    returned, to allow the addition of an auxiliary loss. """
 
-    def __init__(self):
+    def __init__(self, hidden_layer_units):
         super().__init__()
 
         self.lenet = CustomLeNet5(input_channels=1, output_size=10)
-        self.classifier = MLPClassifier(hidden_layers=50)
+        self.classifier = MLPClassifier(hidden_layer_units=hidden_layer_units)
 
     def forward(self, x):
         # Process first images
