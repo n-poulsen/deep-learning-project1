@@ -1,9 +1,8 @@
 from collections import OrderedDict
-from typing import List, Callable
+from typing import List
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 """ File containing all models implemented for Project 1 """
 
@@ -40,11 +39,11 @@ class CustomLeNet5(nn.Module):
     Simple CNN.
     """
 
-    def __init__(self, image_channels):
+    def __init__(self, input_channels, output_size):
         super().__init__()
 
         self.conv_layer_1 = nn.Sequential(
-            nn.Conv2d(image_channels, 12, kernel_size=(3, 3), padding=(1, 1)),
+            nn.Conv2d(input_channels, 12, kernel_size=(3, 3), padding=(1, 1)),
             nn.MaxPool2d((2, 2)),
             nn.ReLU()
         )
@@ -64,7 +63,7 @@ class CustomLeNet5(nn.Module):
             nn.ReLU(),
             nn.Linear(120, 84),
             nn.ReLU(),
-            nn.Linear(84, 10 * image_channels)
+            nn.Linear(84, output_size)
         )
 
     def forward(self, x):
@@ -77,12 +76,12 @@ class CustomLeNet5(nn.Module):
 
 class MLPClassifier(nn.Module):
 
-    def __init__(self):
+    def __init__(self, hidden_layers):
         super().__init__()
 
-        self.fc1 = nn.Linear(20, 10)
+        self.fc1 = nn.Linear(20, hidden_layers)
         self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(10, 2)
+        self.fc2 = nn.Linear(hidden_layers, 2)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -95,11 +94,68 @@ class BaselineCNN(nn.Module):
 
     def __init__(self):
         super().__init__()
+        self.lenet = CustomLeNet5(input_channels=2, output_size=2)
 
-        self.lenet = CustomLeNet5(2)
-        self.classifier = MLPClassifier()
+    def forward(self, x):
+        x = self.lenet(x)
+        return x
+
+
+class BaselineCNN2(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+        self.lenet = CustomLeNet5(input_channels=2, output_size=20)
+        self.classifier = MLPClassifier(hidden_layers=50)
 
     def forward(self, x):
         x = self.lenet(x)
         x = self.classifier(x)
         return x
+
+
+class WeightSharingCNN(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+        self.lenet = CustomLeNet5(input_channels=1, output_size=10)
+        self.classifier = MLPClassifier(hidden_layers=50)
+
+    def forward(self, x):
+        # Process first images
+        x1 = x[:, 0, :, :].reshape(-1, 1, 14, 14)
+        x1 = self.lenet(x1)
+
+        # Process second images
+        x2 = x[:, 1, :, :].reshape(-1, 1, 14, 14)
+        x2 = self.lenet(x2)
+
+        # Concatenate outputs
+        x = torch.cat([x1, x2], dim=1)
+        x = self.classifier(x)
+        return x
+
+
+class WeightSharingAuxLossCNN(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+        self.lenet = CustomLeNet5(input_channels=1, output_size=10)
+        self.classifier = MLPClassifier(hidden_layers=50)
+
+    def forward(self, x):
+        # Process first images
+        x1 = x[:, 0, :, :].reshape(-1, 1, 14, 14)
+        x1 = self.lenet(x1)
+
+        # Process second images
+        x2 = x[:, 1, :, :].reshape(-1, 1, 14, 14)
+        x2 = self.lenet(x2)
+
+        # Concatenate outputs
+        x = torch.cat([x1, x2], dim=1)
+        x = self.classifier(x)
+        return x, x1, x2
