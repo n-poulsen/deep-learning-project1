@@ -116,7 +116,7 @@ def evaluate_models():
     print_divider()
 
     print('Evaluating Weight Sharing + Auxiliary Loss Model')
-    lr = 0.0001
+    lr = 0.001
     hidden_layer_units = 50
     aux_loss_weight = 1.0
     model = weight_sharing_aux_loss(lr, hidden_layer_units)()[0]
