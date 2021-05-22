@@ -45,25 +45,3 @@ Should we:
 * Try different optimizers
 * Can we tune our hyperparameters by generating multiple training sets, our should we generate a single training set and
 use k-fold cross validation on it?
-
-### Baseline Model
-
-Our baseline model is a simple multilayer perceptron (MLP), with a variable amount of hidden layers and units per hidden
-layer. The activation function can also be chosen among all `torch.nn.Module` activation functions.
-
-### Convolutional Neural Networks
-
-TODO
-
-### Weight Sharing
-
-TODO: The problem at hand offers a perfect setup for weight sharing. We are processing two images together, where each image
-should be processed in the same way.
-
-### Padding
-
-TODO: Effect of padding on results
-
-### Activation Function
-
-TODO: Effect of activation function on results

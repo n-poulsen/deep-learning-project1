@@ -19,6 +19,7 @@ def model_tuning(
         train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, data.DataLoader, data.DataLoader, int],
                                Tuple[List[float], List[float], List[float], List[float]]],
         num_epochs: int,
+        rounds: int,
         batch_sizes: List[int],
         learning_rates: List[float],
         hidden_layer_units: List[int],
@@ -35,6 +36,7 @@ def model_tuning(
         number of epochs for which to train. Returns the loss and error rates on the training and test set after each
         epoch.
     :param num_epochs: the number of epochs to train the model for
+    :param rounds: the number of rounds to do validation for
     :param batch_sizes: the batch sizes to try
     :param learning_rates: the learning rates to try
     :param hidden_layer_units: the number of hidden layer units to try
@@ -45,11 +47,6 @@ def model_tuning(
     if seed:
         torch.manual_seed(seed)
 
-    # Load data
-    train_x, train_y, train_c, _, _, _ = generate_pair_sets(1000)
-    image_dataset = ImageDataset(train_x, train_y, train_c)
-    folds = data.random_split(image_dataset, [200, 200, 200, 200, 200], generator=torch.Generator().manual_seed(0))
-
     best_val_loss = 10000
     best_batch_size = None
     best_learning_rate = None
@@ -58,23 +55,25 @@ def model_tuning(
     for batch_size in batch_sizes:
         for lr in learning_rates:
             for hidden_units in hidden_layer_units:
+                # Set round average validation loss
+                average_val_loss = 0
 
                 if seed:
                     torch.manual_seed(seed)
 
-                average_val_loss = 0
-
                 if print_round_results:
                     print(f'Testing batch_size {batch_size}, lr={lr}, units={hidden_units}')
 
-                # Run 5-fold cross validation on the hyperparameters
-                for fold_left_out in range(5):
-                    # Create the training and validation data loaders for the folds
-                    train_folds = folds[:fold_left_out] + folds[fold_left_out + 1:]
-                    train_dataset = data.ConcatDataset(train_folds)
-                    val_dataset = folds[fold_left_out]
-                    train_data = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-                    val_data = data.DataLoader(val_dataset, batch_size=1, shuffle=False)
+                for i in range(rounds):
+                    # Load data
+                    train_x, train_y, train_c, _, _, _ = generate_pair_sets(1000)
+                    image_dataset = ImageDataset(train_x, train_y, train_c)
+
+                    # Split into train and validation sets
+                    train_set, val_set = data.random_split(image_dataset, [800, 200],
+                                                           generator=torch.Generator().manual_seed(0))
+                    train_data = data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
+                    val_data = data.DataLoader(val_set, batch_size=1, shuffle=False)
 
                     # Generate the model, criterion and optimizer
                     model, criterion, optimizer = gen_model({
@@ -88,10 +87,10 @@ def model_tuning(
                     average_val_loss += final_val_loss
 
                     if print_round_results:
-                        print(f'    Round {fold_left_out}: {final_val_loss:.4f}')
+                        print(f'    Round {i}: {final_val_loss:.4f}')
 
                 if print_round_results:
-                    print(f'  Average: {average_val_loss/5:.4f}')
+                    print(f'  Average: {average_val_loss/rounds:.4f}')
 
                 if average_val_loss < best_val_loss:
                     best_val_loss = average_val_loss
@@ -149,12 +148,12 @@ def model_evaluation(
 
         # Print the results for the round
         if print_round_results:
-            print(f'Round {test_round + 1}')
-            print(f'Test results:')
-            print(f'  Train Loss:       {tr_loss[-1]:.3f}')
-            print(f'  Train Error Rate:  {100 * tr_err[-1]:.2f}%')
-            print(f'  Test Error Rate:   {100 * te_err[-1]:.2f}%')
-            print("-" * 50, "\n")
+            print(f'    Round {test_round + 1}')
+            print(f'    Test results:')
+            print(f'      Train Loss:       {tr_loss[-1]:.3f}')
+            print(f'      Train Error Rate:  {100 * tr_err[-1]:.2f}%')
+            print(f'      Test Error Rate:   {100 * te_err[-1]:.2f}%')
+            print(f'    {"-" * 50}\n')
 
     return round_results
 
@@ -212,14 +211,54 @@ def model_evaluation_with_auxiliary_loss(
 
         # Print the results for the round
         if print_round_results:
-            print(f'Round {test_round + 1}')
-            print(f'Test results:')
-            print(f'  Train Loss:       {tr_loss[-1]:.3f}')
-            print(f'  Train Error Rate:  {100 * tr_err[-1]:.2f}%')
-            print(f'  Test Error Rate:   {100 * te_err[-1]:.2f}%')
-            print("-" * 50, "\n")
+            print(f'    Round {test_round + 1}')
+            print(f'    Test results:')
+            print(f'      Train Loss:       {tr_loss[-1]:.3f}')
+            print(f'      Train Error Rate:  {100 * tr_err[-1]:.2f}%')
+            print(f'      Test Error Rate:   {100 * te_err[-1]:.2f}%')
+            print(f'    {"-" * 50}\n')
 
     return round_results
+
+
+def parse_results(round_results: List[Tuple[List[float], List[float], List[float], List[float]]]):
+    """
+
+
+    :param round_results:
+    :return: None
+    """
+    train_loss = []
+    train_error = []
+    test_error = []
+
+    for tr_loss, tr_err, _, te_err in round_results:
+        train_loss.append(tr_loss[-1])
+        train_error.append(tr_err[-1])
+        test_error.append(te_err[-1])
+
+    train_loss = torch.tensor(train_loss)
+    train_error = torch.tensor(train_error)
+    test_error = torch.tensor(test_error)
+
+    #  Mean of the values per epoch
+    mean_train_loss = train_loss.mean()
+    mean_train_error = train_error.mean()
+    mean_test_error = test_error.mean()
+
+    #  Standard deviation of the values per epoch
+    std_train_loss = train_loss.std()
+    std_train_error = train_error.std()
+    std_test_error = test_error.std()
+
+    print(f'Results:')
+    print(f'    Mean Training Loss:  {mean_train_loss:.2f}')
+    print(f'    Mean Training Error: {100 * mean_train_error:.2f}%')
+    print(f'    Mean Testing Error:  {100 * mean_test_error:.2f}%')
+    print()
+    print(f'    STD of Training Loss:   {std_train_loss:.4f}')
+    print(f'    STD of Training Error:  {100 * std_train_error:.2f}')
+    print(f'    STD of Testing Error:   {100 * std_test_error:.2f}')
 
 
 def model_performance(per_round_error_rate: List[float]):
