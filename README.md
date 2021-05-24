@@ -40,7 +40,40 @@ data and weight initialization are randomized, and you should provide estimates 
 
 ### File Structure
 
+All of our models are defined in the `models.py` file. We also create model-generating functions for each one. These
+functions return the model, the loss criterion (and auxiliary loss function for the model using an auxiliary loss) and
+optimizer used to train them. They all take a single dictionary as a parameter, which contains hyperparameters needed
+for the model, loss and optimizer such as learning rate, momentum, weight decay or number of hidden layers in the MLP
+classifier.
 
+We use the `dlc_practical_prologue.py` file (a modified version of it as the `argparse` arguments were annoying me) to
+generate data points from MNIST. We use a PyTorch Dataset and DataLoader to feed the data to our models while training 
+and testing, which are defined in `data_loader.py`.
+
+We have two methods to train our models, defined in `train.py`. The first, `train(*)`, trains models which don't have an
+auxiliary loss. The second, `train_with_auxiliary_loss(*)`, trains models which have an auxiliary loss. Testing methods
+are defined in the same file.
+
+We define evaluation methods in `evaluation.py`, which iteratively:
+* Generate a training and test set using the `generate_pair_sets` from `dlc_practical_prologue.py`.
+* Generate the model using a model-generating function
+* Train and evaluate the model on the generated datasets
+
+These methods then compute the mean and standard deviation of the performance of the model.
+
+We create hyperparameter tuning methods in `hyperparameter_tuning.py`. These methods take a dictionary containing
+hyperparameters (such as batch size, learning rate, momentum, weight decay, ...), which iteratively:
+* Take one possible combination of the parameters, and iteratively:
+    * Generate ONLY a training set using the `generate_pair_sets` from `dlc_practical_prologue.py`.
+    * Do a 80-20 split of the training set, using the 20\% for validation
+    * Generate the model using a model-generating function
+    * Train the model and evaluate it on the
+* Compute the mean loss of the model on the validation set
+
+The methods then combination of parameters that performed best on the validation sets.
+
+The `test.py` file can be called to train and test the models. The `helpers.py` file contains a few helper methods,
+such as printing dividers to the console or computing the mean or standard deviation of models.
 
 ## Questions for TAs
 
