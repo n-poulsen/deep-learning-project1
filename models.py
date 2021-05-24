@@ -1,6 +1,3 @@
-from collections import OrderedDict
-from typing import List
-
 import torch
 import torch.nn as nn
 
@@ -145,3 +142,99 @@ class WeightSharingAuxLossCNN(nn.Module):
         x = torch.cat([x1, x2], dim=1)
         x = self.classifier(x)
         return x, x1, x2
+
+
+def baseline_1(parameters: dict):
+    """
+    Creates a function that generates an one of our baseline 1 models, with an SGD optimizer and a Cross Entropy loss
+    criterion.
+
+    :param parameters: Parameters for the optimizer. Can contain the parameters 'lr' indicating the learning rate,
+        'momentum' for the momentum, and 'weight_decay' for the weight decay. Defaults to PyTorch default parameters.
+    :return: a function that when called returns the model, main loss criterion, and optimizer
+    """
+    lr = parameters.get('lr', 0.01)
+    momentum = parameters.get('lr', 0.9)
+    weight_decay = parameters.get('weight_decay', 0.0)
+
+    def generate_baseline_1():
+        model = BaselineCNN()
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        return model, criterion, optimizer
+
+    return generate_baseline_1
+
+
+def baseline_2(parameters: dict):
+    """
+    Creates a function that generates an one of our baseline 2 models, with an SGD optimizer and a Cross Entropy loss
+    criterion.
+
+    :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
+        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
+        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+    :return: a function that when called returns the model, main loss criterion, and optimizer
+    """
+    lr = parameters.get('lr', 0.01)
+    momentum = parameters.get('lr', 0.9)
+    weight_decay = parameters.get('weight_decay', 0.0)
+    hidden_layer_units = parameters.get('hidden_layer_units', 50)
+
+    def generate_baseline_2():
+        model = BaselineCNN2(hidden_layer_units=hidden_layer_units)
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        return model, criterion, optimizer
+
+    return generate_baseline_2
+
+
+def weight_sharing(parameters: dict):
+    """
+    Creates a function that generates an one of our weight sharing models, with an SGD optimizer, and a Cross Entropy
+    loss criterion.
+
+    :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
+        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
+        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+    :return: a function that when called returns the model, main loss criterion, and optimizer
+    """
+    lr = parameters.get('lr', 0.01)
+    momentum = parameters.get('lr', 0.9)
+    weight_decay = parameters.get('weight_decay', 0.0)
+    hidden_layer_units = parameters.get('hidden_layer_units', 50)
+
+    def generate_weight_sharing():
+        model = WeightSharingCNN(hidden_layer_units=hidden_layer_units)
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        return model, criterion, optimizer
+
+    return generate_weight_sharing
+
+
+def weight_sharing_aux_loss(parameters):
+    """
+    Creates a function that generates an one of our weight sharing models with an auxiliary loss, with an SGD optimizer,
+    and a Cross Entropy loss criterion.
+
+    :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
+        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
+        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+    :return: a function that when called returns the model, main loss criterion, auxiliary loss criterion, and optimizer
+    """
+    lr = parameters.get('lr', 0.01)
+    momentum = parameters.get('lr', 0.9)
+    weight_decay = parameters.get('weight_decay', 0.0)
+    hidden_layer_units = parameters.get('hidden_layer_units', 50)
+
+    def generate_weight_sharing_aux_loss():
+
+        model = WeightSharingAuxLossCNN(hidden_layer_units=hidden_layer_units)
+        criterion = torch.nn.CrossEntropyLoss()
+        aux_criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        return model, criterion, aux_criterion, optimizer
+
+    return generate_weight_sharing_aux_loss

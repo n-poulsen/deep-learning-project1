@@ -36,12 +36,30 @@ trained with 25 epochs in the VM in less than 2s per epoch and should achieve âˆ
 Performance estimates provided in your report should be estimated through 10+ rounds for each architecture, where both
 data and weight initialization are randomized, and you should provide estimates of standard deviations.
 
+## Implementation
+
+### File Structure
+
+
+
 ## Questions for TAs
 
 Should we:
+* We based our architecture on modified LeNet-5
+    * Trained with auxiliary loss works best
+    * Say that we don't need more powerful models as MNIST is an easy dataset: what is tough is training in the right
+    way.
 * Try batch normalization (even though our neural network isn't very deep)
-* Try dropout (even though our neural network isn't very deep)
+    * We can
 * Try different activation functions
 * Try different optimizers
+    * Don't need to
+* Adam:
+    * Momentum computed per coordinate
+    * Not great for vision problems
+    * No definite answers
+    * People still train with momentum
+    * Try SGD with weight decay and momentum
 * Can we tune our hyperparameters by generating multiple training sets, our should we generate a single training set and
 use k-fold cross validation on it?
+    * Yes
