@@ -78,6 +78,19 @@ contains methods used to create plots for our report.
 
 ### Training and Evaluating a Model
 
+A model can be trained and evaluated with the `test.py` file. By default, it only trains and evaluates a single model.
+It takes the following optional parameters:
+
+```
+optional arguments:
+  -h, --help    show this help message and exit
+  --rounds -r   The number of times to train the models on different generated datasets.
+  --log_rounds  Flag indicating to log the results for each round of training to the console
+  --plot        Flag indicating to display plots
+```
+
+To evaluate the models over multiple rounds (such as 10), you can run:
+
 ```
 python test.py --rounds 10
 ```
