@@ -146,11 +146,11 @@ class WeightSharingAuxLossCNN(nn.Module):
 
 def baseline_1(parameters: dict):
     """
-    Creates a function that generates an one of our baseline 1 models, with an SGD optimizer and a Cross Entropy loss
+    Creates a function that generates an one of our baseline 1 models, with an Adam optimizer and a Cross Entropy loss
     criterion.
 
     :param parameters: Parameters for the optimizer. Can contain the parameters 'lr' indicating the learning rate,
-        'momentum' for the momentum, and 'weight_decay' for the weight decay. Defaults to PyTorch default parameters.
+        and 'weight_decay' for the weight decay. Defaults to PyTorch default parameters.
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
@@ -167,12 +167,12 @@ def baseline_1(parameters: dict):
 
 def baseline_2(parameters: dict):
     """
-    Creates a function that generates an one of our baseline 2 models, with an SGD optimizer and a Cross Entropy loss
+    Creates a function that generates an one of our baseline 2 models, with an Adam optimizer and a Cross Entropy loss
     criterion.
 
     :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
-        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
-        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+        indicating the learning rate, 'weight_decay' (default: 0.0), 'hidden_layer_units' (default: 50) for the number
+        of units in the hidden layer of the final classification MLP.
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
@@ -190,12 +190,12 @@ def baseline_2(parameters: dict):
 
 def weight_sharing(parameters: dict):
     """
-    Creates a function that generates an one of our weight sharing models, with an SGD optimizer, and a Cross Entropy
+    Creates a function that generates an one of our weight sharing models, with an Adam optimizer, and a Cross Entropy
     loss criterion.
 
     :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
-        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
-        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+        indicating the learning rate, 'weight_decay' (default: 0.0), 'hidden_layer_units' (default: 50) for the number
+        of units in the hidden layer of the final classification MLP.
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
@@ -213,12 +213,12 @@ def weight_sharing(parameters: dict):
 
 def weight_sharing_aux_loss(parameters):
     """
-    Creates a function that generates an one of our weight sharing models with an auxiliary loss, with an SGD optimizer,
-    and a Cross Entropy loss criterion.
+    Creates a function that generates an one of our weight sharing models with an auxiliary loss, with an Adam
+    optimizer and a Cross Entropy loss criterion.
 
     :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
-        indicating the learning rate, 'momentum' (default: 0.0), 'weight_decay' (default: 0.0), 'hidden_layer_units'
-        (default: 50) for the number of units in the hidden layer of the final classification MLP.
+        indicating the learning rate, 'weight_decay' (default: 0.0), 'hidden_layer_units' (default: 50) for the number
+        of units in the hidden layer of the final classification MLP.
     :return: a function that when called returns the model, main loss criterion, auxiliary loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
