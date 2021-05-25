@@ -32,7 +32,7 @@ ws_parameters = {
 wsal_parameters = {
     'batch_size': 25,
     'lr': 1e-3,
-    'weight_decay': 0.1,
+    'weight_decay': 0.0,
     'hidden_layer_units': 50,
     'aux_loss_weight': 5.0,
 }
