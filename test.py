@@ -16,7 +16,7 @@ baseline_1_parameters = {
 baseline_2_parameters = {
     'batch_size': 25,
     'lr': 1e-4,
-    'weight_decay': 0.0,
+    'weight_decay': 0.1,
     'hidden_layer_units': 50,
 }
 
@@ -24,7 +24,7 @@ baseline_2_parameters = {
 ws_parameters = {
     'batch_size': 25,
     'lr': 1e-4,
-    'weight_decay': 0.0,
+    'weight_decay': 0.1,
     'hidden_layer_units': 50,
 }
 
@@ -32,8 +32,7 @@ ws_parameters = {
 wsal_parameters = {
     'batch_size': 25,
     'lr': 1e-3,
-    'momentum': 0.9,
-    'weight_decay': 0.0,
+    'weight_decay': 0.1,
     'hidden_layer_units': 50,
     'aux_loss_weight': 5.0,
 }

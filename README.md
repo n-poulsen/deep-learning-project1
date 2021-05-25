@@ -73,7 +73,14 @@ hyperparameters (such as batch size, learning rate, momentum, weight decay, ...)
 The methods then combination of parameters that performed best on the validation sets.
 
 The `test.py` file can be called to train and test the models. The `helpers.py` file contains a few helper methods,
-such as printing dividers to the console or computing the mean or standard deviation of models.
+such as printing dividers to the console or computing the mean or standard deviation of models. The `plotting.py` file
+contains methods used to create plots for our report.
+
+### Training and Evaluating a Model
+
+```
+python test.py --rounds 10
+```
 
 ## Questions for TAs
 
