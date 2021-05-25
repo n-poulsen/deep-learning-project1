@@ -111,7 +111,7 @@ def model_tuning(
             average_val_loss = average_val_loss / rounds
 
             if print_round_results:
-                print(f'    Average: {average_val_loss/rounds:.4f}')
+                print(f'    Average: {average_val_loss:.4f}')
 
             if average_val_loss < best_val_loss:
                 best_val_loss = average_val_loss
