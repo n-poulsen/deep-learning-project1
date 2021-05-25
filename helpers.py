@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Callable
 
 import matplotlib.pyplot as plt
 import torch
@@ -10,6 +10,23 @@ def print_divider():
     print("-" * 80)
     print("-" * 80)
     print("-" * 80)
+    print()
+
+
+def log_model_information(model_generating_function: Callable, hyperparameters: dict):
+    """
+    Prints the number of trainable parameters in a model, as well as it's hyperparameters, to the console.
+
+    :param model_generating_function: the function taking the hyperparameters as a argument and returning the model
+        generating function.
+    :param hyperparameters:
+    :return:
+    """
+    model = model_generating_function(hyperparameters)()[0]
+    num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f'  Trainable Parameters: {num_params}')
+    for parameter, value in hyperparameters.items():
+        print(f'  {parameter}: {value}')
     print()
 
 

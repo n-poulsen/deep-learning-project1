@@ -20,7 +20,7 @@ def model_evaluation(
         num_epochs: int,
         batch_size: int,
         seed: Optional[int] = None,
-        print_round_results: bool = True) -> List[Tuple[List[float], List[float], List[float], List[float]]]:
+        log_results: bool = True) -> List[Tuple[List[float], List[float], List[float], List[float]]]:
     """
     Computes the performance of a model over a given number of rounds, computing the average loss and error rate over
     the test set for each one.
@@ -36,7 +36,7 @@ def model_evaluation(
     :param num_epochs: The number of epochs for which to train.
     :param batch_size: The mini-batch size to use for training.
     :param seed: Random seed to use for reproducibility
-    :param print_round_results: Whether to print the results for each round while evaluating models
+    :param log_results: Whether to print the results for each round while evaluating models
     :return: For each round, the training loss, training error, test loss and test error for each epoch.
     """
     if seed:
@@ -67,7 +67,7 @@ def model_evaluation(
         ))
 
         # Print the results for the round
-        if print_round_results:
+        if log_results:
             print(f'    Round {test_round + 1}')
             print(f'    Test results:')
             print(f'      Train Loss:       {results["train_losses"][-1]:.3f}')
@@ -87,7 +87,7 @@ def model_evaluation_with_auxiliary_loss(
         num_epochs: int,
         batch_size: int,
         seed: Optional[int] = None,
-        print_round_results: bool = True) -> List[Tuple[List[float], List[float], List[float], List[float]]]:
+        log_results: bool = True) -> List[Tuple[List[float], List[float], List[float], List[float]]]:
     """
     Computes the performance of a model containing an auxiliary loss over a given number of rounds, computing the
     average loss and error rate over the test set for each one.
@@ -105,7 +105,7 @@ def model_evaluation_with_auxiliary_loss(
     :param num_epochs: The number of epochs for which to train.
     :param batch_size: The mini-batch size to use for training.
     :param seed: Random seed to use for reproducibility
-    :param print_round_results: Whether to print the results for each round while evaluating models
+    :param log_results: Whether to print the results for each round while evaluating models
     :return: For each round, the training loss, training error, test loss and test error for each epoch.
     """
     if seed:
@@ -138,7 +138,7 @@ def model_evaluation_with_auxiliary_loss(
         ))
 
         # Print the results for the round
-        if print_round_results:
+        if log_results:
             print(f'    Round {test_round + 1}')
             print(f'    Test results:')
             print(f'      Train Loss:       {results["train_losses"][-1]:.3f}')
