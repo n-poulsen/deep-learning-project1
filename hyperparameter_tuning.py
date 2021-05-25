@@ -98,7 +98,17 @@ def model_tuning(
             if print_round_results:
                 print(f'        Round {i}: {final_val_loss:.4f}')
 
+            if i + 1 == rounds // 2:
+                halfway_average_loss = average_val_loss/i
+                if halfway_average_loss > 1.5 * best_val_loss:
+                    print('      Skipping: average loss too high halfway through rounds')
+                    # Compensate for the fact that we only went through half the rounds
+                    average_val_loss = 2 * average_val_loss
+                    break
+
         if average_val_loss is not None:
+
+            average_val_loss = average_val_loss / rounds
 
             if print_round_results:
                 print(f'    Average: {average_val_loss/rounds:.4f}')
@@ -195,10 +205,20 @@ def model_tuning_aux_loss(
             if print_round_results:
                 print(f'        Round {i}: {final_val_loss:.4f}')
 
+            if i + 1 == rounds // 2:
+                halfway_average_loss = average_val_loss/i
+                if halfway_average_loss > 1.5 * best_val_loss:
+                    print('      Skipping: average loss too high halfway through rounds')
+                    # Compensate for the fact that we only went through half the rounds
+                    average_val_loss = 2 * average_val_loss
+                    break
+
         if average_val_loss is not None:
 
+            average_val_loss = average_val_loss / rounds
+
             if print_round_results:
-                print(f'    Average: {average_val_loss / rounds:.4f}')
+                print(f'    Average: {average_val_loss:.4f}')
 
             if average_val_loss < best_val_loss:
                 best_val_loss = average_val_loss
@@ -214,18 +234,16 @@ def tune_hyperparameters(models_to_tune):
     rounds = 10
     seed = 0
 
-    batch_sizes = [10, 25, 50]
-    lrs = [0.001, 0.01, 0.1]
-    momentum = [0.1, 0.5, 0.9]
-    weight_decay = [0.001, 0.01, 0.1]
-    hidden_layer_units = [10, 25, 50, 100]
+    batch_sizes = [25]
+    lrs = [0.01, 0.001, 0.0001, 0.00001]
+    weight_decay = [0, 0.001, 0.01, 0.1]
+    hidden_layer_units = [10, 25, 50]
 
     if 'b1' in models_to_tune:
         print('Tuning Baseline 1:')
         base1_hyperparameters = {
             'batch_size': batch_sizes,
             'lr': lrs,
-            'momentum': momentum,
             'weight_decay': weight_decay
         }
         base_1_combination = model_tuning(baseline_1, train, epochs, rounds, base1_hyperparameters, seed=seed)
@@ -236,7 +254,6 @@ def tune_hyperparameters(models_to_tune):
         base2_hyperparameters = {
             'batch_size': batch_sizes,
             'lr': lrs,
-            'momentum': momentum,
             'weight_decay': weight_decay,
             'hidden_layer_units': hidden_layer_units,
         }
@@ -248,7 +265,6 @@ def tune_hyperparameters(models_to_tune):
         ws_hyperparameters = {
             'batch_size': batch_sizes,
             'lr': lrs,
-            'momentum': momentum,
             'weight_decay': weight_decay,
             'hidden_layer_units': hidden_layer_units,
         }
@@ -259,12 +275,14 @@ def tune_hyperparameters(models_to_tune):
         print('Tuning WSAL:')
         wsal_hyperparameters = {
             'batch_size': batch_sizes,
-            'lr': lrs,
-            'momentum': momentum,
-            'weight_decay': weight_decay,
             'hidden_layer_units': hidden_layer_units,
-            'aux_loss_weight': [0.5, 1.0, 2.0, 5.0],
+            'lr': lrs,
+            'weight_decay': weight_decay,
+            'aux_loss_weight': [0.5, 1.0, 2.0, 5.0, 10.0],
         }
+        print('  Testing Values:')
+        for k, v in wsal_hyperparameters.items():
+            print(f'    {k}: {v}')
         wsal_combination = model_tuning_aux_loss(weight_sharing_aux_loss, train_with_auxiliary_loss, epochs,
                                                  rounds, wsal_hyperparameters, seed=seed)
         print(f'  -> Best combination found: {wsal_combination}')

@@ -154,13 +154,12 @@ def baseline_1(parameters: dict):
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
-    momentum = parameters.get('lr', 0.9)
     weight_decay = parameters.get('weight_decay', 0.0)
 
     def generate_baseline_1():
         model = BaselineCNN()
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         return model, criterion, optimizer
 
     return generate_baseline_1
@@ -177,14 +176,13 @@ def baseline_2(parameters: dict):
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
-    momentum = parameters.get('lr', 0.9)
     weight_decay = parameters.get('weight_decay', 0.0)
     hidden_layer_units = parameters.get('hidden_layer_units', 50)
 
     def generate_baseline_2():
         model = BaselineCNN2(hidden_layer_units=hidden_layer_units)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         return model, criterion, optimizer
 
     return generate_baseline_2
@@ -201,14 +199,13 @@ def weight_sharing(parameters: dict):
     :return: a function that when called returns the model, main loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
-    momentum = parameters.get('lr', 0.9)
     weight_decay = parameters.get('weight_decay', 0.0)
     hidden_layer_units = parameters.get('hidden_layer_units', 50)
 
     def generate_weight_sharing():
         model = WeightSharingCNN(hidden_layer_units=hidden_layer_units)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         return model, criterion, optimizer
 
     return generate_weight_sharing
@@ -225,7 +222,6 @@ def weight_sharing_aux_loss(parameters):
     :return: a function that when called returns the model, main loss criterion, auxiliary loss criterion, and optimizer
     """
     lr = parameters.get('lr', 0.01)
-    momentum = parameters.get('lr', 0.9)
     weight_decay = parameters.get('weight_decay', 0.0)
     hidden_layer_units = parameters.get('hidden_layer_units', 50)
 
@@ -234,7 +230,7 @@ def weight_sharing_aux_loss(parameters):
         model = WeightSharingAuxLossCNN(hidden_layer_units=hidden_layer_units)
         criterion = torch.nn.CrossEntropyLoss()
         aux_criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         return model, criterion, aux_criterion, optimizer
 
     return generate_weight_sharing_aux_loss
