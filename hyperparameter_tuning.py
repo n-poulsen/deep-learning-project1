@@ -86,7 +86,7 @@ def model_tuning(
         # Set round average validation loss
         average_val_loss = 0
 
-        if seed:
+        if seed is not None:
             torch.manual_seed(seed)
 
         for i in range(rounds):
@@ -181,7 +181,7 @@ def model_tuning_aux_loss(
         # Set round average validation loss
         average_val_loss = 0
 
-        if seed:
+        if seed is not None:
             torch.manual_seed(seed)
 
         for i in range(rounds):

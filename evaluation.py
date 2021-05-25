@@ -37,7 +37,7 @@ def model_evaluation(
     :param log_results: Whether to print the results for each round while evaluating models
     :return: For each round, the training loss, training error, test loss and test error for each epoch.
     """
-    if seed:
+    if seed is not None:
         torch.manual_seed(seed)
 
     round_results = []
@@ -104,7 +104,7 @@ def model_evaluation_with_auxiliary_loss(
     :param log_results: Whether to print the results for each round while evaluating models
     :return: For each round, the training loss, training error, test loss and test error for each epoch.
     """
-    if seed:
+    if seed is not None:
         torch.manual_seed(seed)
 
     round_results = []

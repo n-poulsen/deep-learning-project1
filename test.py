@@ -39,7 +39,7 @@ wsal_parameters = {
 
 
 def evaluate_models(rounds: int, log_results: bool, plot: bool):
-    epochs = 25
+    epochs = 2
     seed = 0
 
     print(f'\n\nEvaluating models through {rounds} rounds of training.')
@@ -52,8 +52,6 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
     baseline_1_results = model_evaluation(baseline_1(baseline_1_parameters), rounds, epochs,
                                           baseline_1_parameters['batch_size'], seed=seed, log_results=log_results)
     parse_results(baseline_1_results)
-    if plot:
-        plot_results(baseline_1_results, baseline_1_name)
     print_divider()
 
     print('Evaluating Baseline 2 Model')
@@ -62,8 +60,6 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
     baseline_2_results = model_evaluation(baseline_2(baseline_2_parameters), rounds, epochs,
                                           baseline_2_parameters['batch_size'], seed=seed, log_results=log_results)
     parse_results(baseline_2_results)
-    if plot:
-        plot_results(baseline_2_results, baseline_2_name)
     print_divider()
 
     print('Evaluating Weight Sharing Model')
@@ -72,8 +68,6 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
     ws_results = model_evaluation(weight_sharing(ws_parameters), rounds, epochs, ws_parameters['batch_size'], seed=seed,
                                   log_results=log_results)
     parse_results(ws_results)
-    if plot:
-        plot_results(ws_results, ws_name)
     print_divider()
 
     print('Evaluating Weight Sharing + Auxiliary Loss Model')
@@ -83,8 +77,6 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
         weight_sharing_aux_loss(wsal_parameters), wsal_parameters["aux_loss_weight"], rounds, epochs,
         wsal_parameters['batch_size'], seed=seed, log_results=log_results)
     parse_results(wsal_results)
-    if plot:
-        plot_results(wsal_results, wsal_name)
     print_divider()
 
     model_test_errors = {
@@ -95,6 +87,11 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
     }
 
     if plot:
+        # Create plots
+        plot_results(baseline_1_results, baseline_1_name)
+        plot_results(baseline_2_results, baseline_2_name)
+        plot_results(ws_results, ws_name)
+        plot_results(wsal_results, wsal_name)
         # Create box plot
         error_rate_box_plots(model_test_errors)
 
