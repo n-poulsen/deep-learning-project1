@@ -1,12 +1,12 @@
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as data
 
 from dlc_practical_prologue import generate_pair_sets
 from data_loader import train_loader, test_loader
+from train import train, train_with_auxiliary_loss
 
 
 """ Contains model evaluation methods """
@@ -14,8 +14,6 @@ from data_loader import train_loader, test_loader
 
 def model_evaluation(
         gen_model: Callable[[], Tuple[nn.Module, nn.Module, optim.Optimizer]],
-        train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, data.DataLoader, data.DataLoader, int],
-                               Dict[str, List[float]]],
         rounds: int,
         num_epochs: int,
         batch_size: int,
@@ -54,7 +52,7 @@ def model_evaluation(
         model, criterion, optimizer = gen_model()
 
         # Train the model
-        results = train_method(model, optimizer, criterion, train_data, test_data, num_epochs)
+        results = train(model, optimizer, criterion, train_data, test_data, num_epochs)
 
         if results is None:
             raise OverflowError('Loss became NaN in training. Try different hyperparameters')
@@ -80,8 +78,6 @@ def model_evaluation(
 
 def model_evaluation_with_auxiliary_loss(
         gen_model: Callable[[], Tuple[nn.Module, nn.Module, nn.Module, optim.Optimizer]],
-        train_method: Callable[[nn.Module, optim.Optimizer, nn.Module, nn.Module, data.DataLoader, data.DataLoader,
-                                int, float], Dict[str, List[float]]],
         auxiliary_loss_weight: float,
         rounds: int,
         num_epochs: int,
@@ -123,8 +119,8 @@ def model_evaluation_with_auxiliary_loss(
         model, criterion, aux_criterion, optimizer = gen_model()
 
         # Train the model
-        results = train_method(model, optimizer, criterion, aux_criterion, train_data, test_data, num_epochs,
-                               auxiliary_loss_weight)
+        results = train_with_auxiliary_loss(
+            model, optimizer, criterion, aux_criterion, train_data, test_data, num_epochs, auxiliary_loss_weight)
 
         if results is None:
             raise OverflowError('Loss became NaN in training. Try different hyperparameters')
