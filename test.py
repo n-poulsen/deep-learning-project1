@@ -25,7 +25,7 @@ ws_parameters = {
     'batch_size': 25,
     'lr': 1e-4,
     'weight_decay': 0.1,
-    'hidden_layer_units': 50,
+    'hidden_layer_units': 100,
 }
 
 # Hyperparameters used to train the weight sharing with auxiliary loss model
@@ -33,13 +33,13 @@ wsal_parameters = {
     'batch_size': 25,
     'lr': 1e-3,
     'weight_decay': 0.0,
-    'hidden_layer_units': 50,
-    'aux_loss_weight': 5.0,
+    'hidden_layer_units': 100,
+    'aux_loss_weight': 10.0,
 }
 
 
 def evaluate_models(rounds: int, log_results: bool, plot: bool):
-    epochs = 2
+    epochs = 30
     seed = 0
 
     print(f'\n\nEvaluating models through {rounds} rounds of training.')
