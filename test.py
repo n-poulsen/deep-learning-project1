@@ -98,7 +98,7 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description='Generate and test the models')
-    p.add_argument('--rounds', metavar='-r', type=int, default=1,
+    p.add_argument('--rounds', type=int, default=1,
                    help='The number of times to train the models on different generated datasets.')
     p.add_argument('--log_rounds', action='store_true',
                    help='Flag indicating to log the results for each round of training to the console')

@@ -84,7 +84,7 @@ It takes the following optional parameters:
 ```
 optional arguments:
   -h, --help    show this help message and exit
-  --rounds -r   The number of times to train the models on different generated datasets.
+  --rounds   The number of times to train the models on different generated datasets.
   --log_rounds  Flag indicating to log the results for each round of training to the console
   --plot        Flag indicating to display plots
 ```
