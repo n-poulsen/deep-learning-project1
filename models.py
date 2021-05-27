@@ -76,7 +76,7 @@ class BaselineCNN(nn.Module):
 
 
 class BaselineCNN2(nn.Module):
-    """ First baseline classifier: the two images are passed as 2 channels to LeNet5, which outputs a tensor containing
+    """ Second baseline classifier: the two images are passed as 2 channels to LeNet5, which outputs a tensor containing
     20 values. These values are then passed to a simple classifier with a single hidden layer. """
 
     def __init__(self, hidden_layer_units):
@@ -146,7 +146,7 @@ class WeightSharingAuxLossCNN(nn.Module):
 
 def baseline_1(parameters: dict):
     """
-    Creates a function that generates an one of our baseline 1 models, with an Adam optimizer and a Cross Entropy loss
+    Creates a function that generates one of our baseline 1 models, with an Adam optimizer and a Cross Entropy loss
     criterion.
 
     :param parameters: Parameters for the optimizer. Can contain the parameters 'lr' indicating the learning rate,
@@ -167,7 +167,7 @@ def baseline_1(parameters: dict):
 
 def baseline_2(parameters: dict):
     """
-    Creates a function that generates an one of our baseline 2 models, with an Adam optimizer and a Cross Entropy loss
+    Creates a function that generates one of our baseline 2 models, with an Adam optimizer and a Cross Entropy loss
     criterion.
 
     :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)
@@ -213,7 +213,7 @@ def weight_sharing(parameters: dict):
 
 def weight_sharing_aux_loss(parameters):
     """
-    Creates a function that generates an one of our weight sharing models with an auxiliary loss, with an Adam
+    Creates a function that generates one of our weight sharing models with an auxiliary loss, with an Adam
     optimizer and a Cross Entropy loss criterion.
 
     :param parameters: Parameters for the optimizer and model. Can contain the parameters 'lr' (default: 0.01)

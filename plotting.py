@@ -49,7 +49,8 @@ def plot_model_error_rate_per_epoch(mean_train_error: List[float], std_train_err
 
 def error_rate_box_plots(model_test_errors: Dict[str, List[List[float]]]):
     """
-    Computes the mean and standard deviation of the error rate for a model, and plots the error rate for each round.
+    Computes the mean and standard deviation of the error rate for a model,
+    and plot a box plot of the testing error rate for each model.
 
     :param model_test_errors: The error rate over each round of the training
     :return: None
@@ -86,9 +87,11 @@ def error_rate_box_plots(model_test_errors: Dict[str, List[List[float]]]):
 
 def plot_results(round_results: List[Tuple[List[float], List[float], List[float], List[float]]], model_name: str):
     """
-        Compute the mean train loss, mean train loss std, mean train error, mean train error std, mean test error
-        and mean test error std. Each one aggregated per epoch. Then plot the mean train loss per epoch and the mean
-        and standard deviation of the error rate for a model, and plots the error rate for each round.
+        Compute the mean train loss, the train loss std, mean train error, train error std, mean test error
+        and test error std. Each one aggregated per epoch.
+        Plot the mean train loss per epoch.
+        Plot the mean error rate and std per epoch.
+        Plot a box plot of the testing error rate for each model
 
         :param round_results: results of training a model during a number of rounds, where the results for each round
         are a tuple containing the training loss, training error rate, test loss and test error rate per epoch
@@ -96,8 +99,8 @@ def plot_results(round_results: List[Tuple[List[float], List[float], List[float]
         :return: None
     """
 
-    mean_train_loss, std_train_loss, mean_train_error, std_train_error, mean_test_error, std_test_error = compute_statistics(
-        round_results)
+    mean_train_loss, std_train_loss, mean_train_error, std_train_error, mean_test_error, std_test_error = \
+        compute_statistics(round_results)
 
     plot_model_training_loss_per_epoch(mean_train_loss, model_name)
     plot_model_error_rate_per_epoch(mean_train_error, std_train_error, mean_test_error, std_test_error, model_name)
