@@ -61,14 +61,23 @@ def parse_results(round_results: List[Tuple[List[float], List[float], List[float
     std_train_error = train_error.std()
     std_test_error = test_error.std()
 
-    print(f'Results:')
-    print(f'    Mean Training Loss:  {mean_train_loss:.2f}')
-    print(f'    Mean Training Error: {100 * mean_train_error:.2f}%')
-    print(f'    Mean Testing Error:  {100 * mean_test_error:.2f}%')
-    print()
-    print(f'    STD of Training Loss:   {std_train_loss:.4f}')
-    print(f'    STD of Training Error:  {100 * std_train_error:.2f}')
-    print(f'    STD of Testing Error:   {100 * std_test_error:.2f}')
+    # If only one round is ran, we only display the training loss, training error and testing error for that round
+    if len(round_results) <2:
+        print(f'Results:')
+        print(f'Training Loss:  {mean_train_loss:.2f}')
+        print(f'Training Error: {100 * mean_train_error:.2f}%')
+        print(f'Testing Error:  {100 * mean_test_error:.2f}%')
+    # If more than one round is ran, we  display the mean and standard deviation per epoch of the training losses,
+    # training errors and testing errors
+    else:
+        print(f'Results:')
+        print(f'    Mean Training Loss:  {mean_train_loss:.2f}')
+        print(f'    Mean Training Error: {100 * mean_train_error:.2f}%')
+        print(f'    Mean Testing Error:  {100 * mean_test_error:.2f}%')
+        print()
+        print(f'    STD of Training Loss:   {std_train_loss:.4f}')
+        print(f'    STD of Training Error:  {100 * std_train_error:.2f}')
+        print(f'    STD of Testing Error:   {100 * std_test_error:.2f}')
 
 
 def compute_statistics(round_results: List[Tuple[List[float], List[float], List[float], List[float]]]):
