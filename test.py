@@ -15,7 +15,7 @@ baseline_1_parameters = {
 # Hyperparameters used to train the baseline_2 model
 baseline_2_parameters = {
     'batch_size': 25,
-    'lr': 1e-4,
+    'lr': 1e-3,
     'weight_decay': 0.1,
     'hidden_layer_units': 50,
 }
@@ -25,12 +25,12 @@ ws_parameters = {
     'batch_size': 25,
     'lr': 1e-4,
     'weight_decay': 0.1,
-    'hidden_layer_units': 100,
+    'hidden_layer_units': 50,
 }
 
 # Hyperparameters used to train the weight sharing with auxiliary loss model
 wsal_parameters = {
-    'batch_size': 25,
+    'batch_size': 10,
     'lr': 1e-3,
     'weight_decay': 0.0,
     'hidden_layer_units': 100,
@@ -98,7 +98,7 @@ def evaluate_models(rounds: int, log_results: bool, plot: bool):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description='Generate and test the models')
-    p.add_argument('--rounds', metavar='-r', type=int, default=10,
+    p.add_argument('--rounds', metavar='-r', type=int, default=1,
                    help='The number of times to train the models on different generated datasets.')
     p.add_argument('--log_rounds', action='store_true',
                    help='Flag indicating to log the results for each round of training to the console')
