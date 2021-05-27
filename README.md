@@ -78,7 +78,7 @@ contains methods used to create plots for our report.
 
 ### Training and Evaluating a Model
 
-A model can be trained and evaluated with the `test.py` file. By default, it only trains and evaluates a single model.
+A model can be trained and evaluated with the `test.py` file. By default, it only trains and evaluates all models for one round.
 It takes the following optional parameters:
 
 ```
